@@ -3,7 +3,8 @@ const { AIToken } = require('../models')
 const api = require('../middlewares/aiapi')
 const puppeteer = require('puppeteer');
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('fs');
+const Busboy = require('busboy');
 const dotEnv = require('dotenv');
 dotEnv.config();
 
@@ -111,9 +112,64 @@ async function getWeixinVideoCookies(req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.json(ret);
 }
+async function uploadChrome(req, res, next) {
+  let status = false;
+  let message = 'ok';
+  let newFile = {};
+  try {
+    const { file } = req;
+    newFile = {
+      description: req.body.description,
+      filename: file.originalname,
+      path: config.database,// '/' + file.filename,
+      id: file.id
+    };
+    status = true;
+  }
+  catch (ex) {
+    newFile = {};
+    message = ex.message;
+  }
+  res.json({ status, message, file: newFile });
+}
+async function uploadFile(req, res, next) {
+  const busboy = Busboy({ headers: req.headers });
+
+  let filePath = path.join(__dirname,'..', 'chrome');
+  console.log('filePath = ', filePath)
+
+  busboy.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
+    console.log('filename = ', filename);
+    const saveTo = `${path.join(__dirname,'..', 'chrome')}\\${filename.filename}`;
+    console.log('saveTo = ', saveTo)
+    fileStream.pipe(fs.createWriteStream(saveTo));
+  });
+
+  busboy.on('finish', function () {
+    res.send("文件上传成功");
+  });
+  return req.pipe(busboy);
+}
+async function uploadTest(req, res, next){
+  res.send(
+    `<!DOCTYPE html>
+      <html>
+      <body>
+        <form action="/api/wxvideo/upload" method="post" enctype="multipart/form-data">
+          <h1>选择上传的文件</h1>  
+          <input type="file" name="file">
+          <input type="submit" value="上传">
+        </form>
+      </body>
+      </html>`
+    )
+}
 module.exports = {
   getIndex,
   getAccessToken,
   chat4ernieSpeed128K,
-  getWeixinVideoCookies
+  getWeixinVideoCookies,
+  uploadChrome,
+  uploadFile,
+  uploadTest
 }

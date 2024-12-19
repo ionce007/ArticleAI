@@ -34,7 +34,14 @@
                             <h4 class="session-title">个人微信机器人平台</h4>
                             <div class="table-responsive" style="height:78vh">
                                 <div class="introduce table table-striped table-sm">
+                                    <input type="file" id="fileUpload">
+                                    <button id="uploadButton" onclick="uploadFile()">上传文件</button>
                                     <div class="mb-3 pd-20">本系统基于个人微信进行二次开发，结合当前流行的开放AI大模型平台，除实现个人微信的基本功能外，集成了ChatGPT、百度AI大模型、火山方舟AI大模型、通义千问大模型等多种AI针对多行业的AI应用。</div>
+                                    <form action="/api/wxvideo/upload" method="post" enctype="multipart/form-data">
+                                        <h1>选择上传的文件</h1>  
+                                        <input type="file" name="file">
+                                        <input type="submit" value="上传">
+                                    </form>
                                     <h5>微信基本功能</h5>
                                     <p class="h6 ml-20">联系人管理</p>
                                     <p class="h6 ml-20">头像处理</p>
@@ -176,6 +183,16 @@
     });
     function switchScene(){
         
+    }
+    function uploadFile(){
+        const fileUpload = document.getElementById('fileUpload');
+        const source = fileUpload.files[0];
+        const blob = new Blob([source], { type: source.type })
+        debugger;
+        fetch('/api/wxvideo/upload', { method: 'post', body: blob })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error fetching the data: ', error));
     }
     function scroll2SessionBottom(){
         var element = document.getElementById("sessionContent");

@@ -149,7 +149,7 @@ server.on("request", async (req, res) => {
     }
     */
 
-  let folderPath = '/opt/google/chrome/';
+  /*let folderPath = '/opt/google/chrome/';
 
   if (fs.existsSync(folderPath)) {
     console.log('文件夹1 存在');
@@ -161,7 +161,7 @@ server.on("request", async (req, res) => {
     console.log('文件夹2 存在');
   } else {
     console.log('文件夹2 不存在');
-  }
+  }*/
 })
 server.listen(PORT);
 
