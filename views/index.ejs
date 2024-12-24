@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <%- include('./partials/header') %>
+</head>
+
+<body>
+    <!--<div id="login" class="container-fiuled text-center qrcode-parent">
+        <div class="qrcode-child">
+            <h5 id="scanTip" class="mb-3">个人微信扫码登录</h5>
+            <div id="qrcode" class="text-center"></div>
+        </div>
+    </div>-->
+    <div id="wechat"> <!-- class="d-none" --> 
+        <%- include('./partials/nav') %>
+            <div class="container-fluid">
+                <div class="row">
+                    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse overflow-auto">
+                        <div class="position-sticky pt-3">
+                            <ul class="nav flex-column" id="ulContacts">
+                                <li class='nav-item'><a class='nav-link' onclick='switchScene()' data-key='dialogue' aria-current='page' href='#'>智能客服</a></li>
+                                <li class='nav-item'><a class='nav-link' onclick='switchScene()' data-key='document' aria-current='page' href='#'>社媒文案</a></li>
+                                <li class='nav-item'><a class='nav-link' onclick='switchScene()' data-key='img2article' aria-current='page' href='#'>图生文章</a></li>
+                                <li class='nav-item'><a class='nav-link' onclick='switchScene()' data-key='article' aria-current='page' href='#'>文章创作</a></li>
+                                <li class='nav-item'><a class='nav-link' onclick='switchScene()' data-key='videoscript' aria-current='page' href='#'>视频角本</a></li>
+                                <li class='nav-item'><a class='nav-link' onclick='switchScene()' data-key='videoscript' aria-current='page' href='#'>视频角本</a></li>
+                                <li class='nav-item'><a class='nav-link' onclick='switchScene()' data-key='advertdocument' aria-current='page' href='#'>广告文案</a></li>
+                            </ul>
+                        </div>
+                    </nav>
+                    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="appIntroduce">
+                        <div style="height:92vh">
+                            <h4 class="session-title">个人微信机器人平台</h4>
+                            <div class="table-responsive" style="height:78vh">
+                                <div class="introduce table table-striped table-sm">
+                                    <div class="mb-3 pd-20">本系统基于个人微信进行二次开发，结合当前流行的开放AI大模型平台，除实现个人微信的基本功能外，集成了ChatGPT、百度AI大模型、火山方舟AI大模型、通义千问大模型等多种AI针对多行业的AI应用。</div>
+                                    <h5>微信基本功能</h5>
+                                    <p class="h6 ml-20">联系人管理</p>
+                                    <p class="h6 ml-20">头像处理</p>
+                                    <p class="h6 ml-20">好友互动</p>
+                                    <p class="h6 ml-20">群管理</p>
+                                    <p class="h6 ml-20">红包信息</p>
+                                    <p class="h6 ml-20">转账信息</p>
+                                    <p class="h6 ml-20">转发消息</p>
+                                    <p class="h6 ml-20">撤回消息</p>
+                                    <h5>工作/生活助手</h5>
+                                    <p class="h6 ml-20">定时任务</p>
+                                    <p class="h6 ml-20">智能机器人对话</p>
+                                    <p class="h6 ml-20">智能客服</p>
+                                    <p class="h6 ml-20">图片解析</p>
+                                    <h5>文案/图片/视频生成</h5>
+                                    <p class="h6 ml-20">自媒体文案生成</p>
+                                    <p class="h6 ml-20">创意文案生成</p>
+                                    <p class="h6 ml-20">小视频生成</p>
+                                    <p class="h6 ml-20">小视频剧本</p>
+                                    <h5>远期计划</h5>
+                                    <p class="h6 ml-20">支持企业微信</p>
+                                    <p class="h6 ml-20">支持QQ</p>
+                                    <p class="h6 ml-20">支持叮叮</p>
+                                    <p class="h6 ml-20">支持WhatsApp</p>
+                                    <p class="h6 ml-20">支持Gitter</p>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 d-none" id="sessionRecord">
+                        <div style="height:92vh">
+                            <h4 class='session-title' id="sessionTitle">会话</h4>
+                            <div class="row row-cols-1 row-cols-md-2">
+                                <div class="col col-w65" id="sessionContent"></div>
+                                <div class="col col-w35 ml-5">
+                                    <div class="card" style="border:none;">
+                                        <div class="card-body">
+                                          <h5 class="card-title">模型选择</h5>
+                                        </div>
+                                        <fieldset class="" style="padding-left:2rem;">
+                                            <div class="form-check">
+                                                <input type="radio" name="models" class="form-check-input" id="moduleDB">
+                                                <label class="form-check-label" for="moduleDB">豆包doubao-pro-32k（火山方舟）</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="models" class="form-check-input" checked id="moduleBD">
+                                                <label class="form-check-label" for="moduleBD">百度ERNIE-Speed-128K</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="models" class="form-check-input" disabled id="moduleGPT35">
+                                                <label class="form-check-label" for="moduleGPT35">ChatGPT3.5</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="models" class="form-check-input" disabled id="moduleGPT40">
+                                                <label class="form-check-label" for="moduleGPT40">ChatGPT4.0</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="models" class="form-check-input" disabled id="moduleKIMI">
+                                                <label class="form-check-label" for="moduleKIMI">Kimi</label>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="card" style="border:none;">
+                                        <div class="card-body">
+                                          <h5 class="card-title">应用场景</h5>
+                                        </div>
+                                        <fieldset class="mb-3" style="padding-left:2rem;">
+                                            <div class="form-check">
+                                                <input type="radio" name="Scene" class="form-check-input" checked id="sceneDH">
+                                                <label class="form-check-label" for="sceneDH">智能对话</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="Scene" class="form-check-input" disabled id="sceneKF">
+                                                <label class="form-check-label" for="sceneKF">智能客服</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="Scene" class="form-check-input" disabled id="sceneXHS">
+                                                <label class="form-check-label" for="sceneXHS">小红书文案</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="Scene" class="form-check-input" disabled id="sceneHT">
+                                                <label class="form-check-label" for="sceneHT">文生图--智能绘图</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="Scene" class="form-check-input" disabled id="sceneJB">
+                                                <label class="form-check-label" for="sceneJB">小视频剧本</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="Scene" class="form-check-input" disabled id="sceneXSP">
+                                                <label class="form-check-label" for="sceneXSP">生成小视频</label>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="card" style="border:none;">
+                                        <div class="card-body">
+                                          <h5 class="card-title">智能助手</h5>
+                                        </div>
+                                        <fieldset class="mb-3" style="padding-left:2rem;">
+                                            <div class="form-check">
+                                                <input type="radio" name="assistant" class="form-check-input" disabled id="assTX">
+                                                <label class="form-check-label" for="assTX">定时事件提醒</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" name="assistant" class="form-check-input" disabled id="assXX">
+                                                <label class="form-check-label" for="assXX">消息/信息提醒</label>
+                                            </div>
+                                            <div class="mb-3 form-check">
+                                                <input type="radio" name="assistant" class="form-check-input" disabled id="assDS">
+                                                <label class="form-check-label" for="assDS">定时发消息给好友</label>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                              </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+    </div>
+    <!--<div class="modal fade" id="loading" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loadingLabel" aria-hidden="true" style="overflow-y:hidden;">
+        <div class="modal-dialog">
+            <div class="modal-tip" id="loadingLabel">初始化中，请稍等......</div>
+        </div>
+    </div>-->
+</body>
+
+<script>
+    /*var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?1a99008198284d89d6891246198a6ad0";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();*/
+</script>
+    
+<script type="text/javascript">
+    $(function(){
+    });
+    function switchScene(){
+        
+    }
+    function uploadFile(){
+        const fileUpload = document.getElementById('fileUpload');
+        const source = fileUpload.files[0];
+        const blob = new Blob([source], { type: source.type })
+        debugger;
+        fetch('/api/wxvideo/upload', { method: 'post', body: blob })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error fetching the data: ', error));
+    }
+    function scroll2SessionBottom(){
+        var element = document.getElementById("sessionContent");
+        element.scrollTop = element.scrollHeight;
+    }
+    function getMsgTime(timestamp){
+        var datetime = timestampToTime(timestamp);
+        var cur_time = timestampToTime(Date.now());
+        var dt = datetime.split(' ');
+        var ct = cur_time.split(' ');
+        if(dt[0] === ct[0]) return dt[1];
+        return datetime;
+    }
+    function timestampToTime(stamp) {
+        var timestamp = stamp;
+        if((stamp+'').length < 13 ) timestamp = timestamp * 1000;
+        var date = new Date(timestamp); // 时间戳转换成Date对象
+        var year = date.getFullYear(); // 获取年
+        var month = date.getMonth() + 1; // 获取月（月份比实际小1，所以需要+1）
+        var day = date.getDate(); // 获取日
+        var hours = date.getHours(); // 获取小时
+        var minutes = date.getMinutes(); // 获取分钟
+        var seconds = date.getSeconds(); // 获取秒钟
+       
+        // 补零操作
+        month = (month < 10 ? "0" : "") + month;
+        day = (day < 10 ? "0" : "") + day;
+        hours = (hours < 10 ? "0" : "") + hours;
+        minutes = (minutes < 10 ? "0" : "") + minutes;
+        seconds = (seconds < 10 ? "0" : "") + seconds;
+       
+        // 拼接成YYYY-MM-DD HH:MM:SS格式
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+</script>
+</html>
