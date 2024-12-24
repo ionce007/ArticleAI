@@ -4,7 +4,7 @@
   "description": "NodeJS网页版文案/文章智能生成工具",
   "main": "app.js",
   "scripts": {
-    "start": "chmod u+x ./chrome && node ./app.js",
+    "start": "node ./app.js",
     "render": "export PATH=\"${PATH}:/opt/render/project/.render/chrome/opt/google/chrome\" && npm run start",
     "dev": "nodemon ./app.js",
     "renderStart": "chmod +x ./chrome.sh && bash ./chrome.sh && npm run render",
