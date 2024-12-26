@@ -47,7 +47,7 @@
                 // 这里的event.data就是服务器发送的数据
                 //console.log("Received data: ", JSON.parse(event.data));
                 let msgData = JSON.parse(event.data);
-                console.log('msgData = ', msgData);
+                //console.log('msgData = ', msgData);
                 if(msgData.event.indexOf('qrcode-') >= 0){
                     let chunk = msgData.event.split('-')[0];
                     let order = parseInt(msgData.event.split('-')[1]);
@@ -70,7 +70,10 @@
                     source.close();
                     $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
-                    if(msgData.event === 'successed') $('.status-tips').html(`<span>扫码登录成功！</span>`);
+                    if(msgData.event === 'successed'){ 
+                        $('.status-tips').html(`<span>扫码登录成功！</span>`);
+                        setTimeout(function() { location.href = 'http://www.foryet.net';},3000);
+                    }
                     else if(msgData.event === 'falied') $('.status-tips').html(`<span>登录失败！<br />刷新页面后重新登录</span>`);
                 } 
                 if(msgData.event ==='expired' ){
