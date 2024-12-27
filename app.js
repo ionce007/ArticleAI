@@ -14,6 +14,8 @@ const http = require('http');
 const app = express();
 const server = http.createServer(app);
 app.use(cookie());
+app.use(cros());
+
 const webRouter = require('./routes/webroutes');
 const apiRouter = require('./routes/apiroutes');
 

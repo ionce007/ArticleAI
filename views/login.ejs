@@ -30,12 +30,12 @@
 
 <script type="text/javascript">
     $(function () {
-        receivedMessage()
+        //receivedMessage()
     });
     $("#btnGenQR").on('click',function(){
         $('#btnGenQR').removeClass('hidden').addClass('hidden');
         $('#imgQrCode').removeClass('hidden');
-        receivedMessage();
+        //receivedMessage();
     });
     function receivedMessage() {
         if (typeof (EventSource) !== "undefined") {
