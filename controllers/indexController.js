@@ -88,14 +88,19 @@ function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 async function getWeixinVideoCookiesSSE(req, res, next) {
-  res.writeHead(200, {
+  /*res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
     'Access-Control-Allow-Origin': "*",
     'Access-Control-Allow-Headers': 'Content-Type,Content-Length,Authorization,Accept,X-Requested-With',
     'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS'
-  });
+  });*/
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
   let ret = {};
   let userInfo = undefined;
   let headers = undefined;
@@ -124,9 +129,17 @@ async function getWeixinVideoCookiesSSE(req, res, next) {
       else sseData = '正在回传数据';
       await writeMessage(res, sseData, status);
       if (response.url().indexOf('/mmfinderassistant-bin/auth/auth_data') >= 0 && response.status() === 201) {
-        userInfo = (!userInfo ? await response.json() : userInfo);
-        sseData = '微信扫码成功，成功获取用户数据';
-        await writeMessage(res, sseData, status);
+        try{
+          userInfo = (!userInfo ? await response.json() : userInfo);
+          sseData = '微信扫码成功，成功获取用户数据';
+          await writeMessage(res, sseData, status);
+        }
+        catch(ex){
+          await writeMessage(res, ex.message, 'falied');
+          await browser.close();
+          res.end();
+        }
+
       }
       if (response.url().indexOf('mmfinderassistant-bin/auth/auth_login_status') >= 0 && response.status() === 201) {
         let qrScanStatus = await response.json();
