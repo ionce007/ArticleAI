@@ -1,0 +1,22 @@
+{
+    "restartable": "rs",
+    "verbose": true,
+    "watch": [
+      "config/",
+      "controllers/",
+      "routes/",
+      "utils/",
+      "views/",
+      "middlewares/",
+      "models/",
+      "app.js"
+    ],
+    "ignore": [
+      "assets/",
+      "public/",
+      "*.memory-card.json"
+    ],
+    "delay": "1000",
+    "ext": "js ts ejs yml json"
+  }
+  
