@@ -36,11 +36,11 @@ async function wxvlogin(req, res, next) {
         const startTime = Date.now();
         const sessionId = req.query.token;
         //console.log('sessionId = ', sessionId);
-        if(!sessionId){
+        /*if(!sessionId){
             await writeMessage(res, { msg: '请从合法途径访问本站', data: {}, event: 'patherror' });
             res.end();
             return;
-        }
+        }*/
         await writeMessage(res, { msg: '程序启动，开始获取登录token', data: {}, event: 'message' });
         const token = await video.get_login_token();
         //console.log('token = ', token);

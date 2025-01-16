@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node ./app.js",
-    "heart": "node ./middlewares/jobs.js",
-    "heart:dev": "nodemon ./middlewares/jobs.js",
+    "job": "node ./middlewares/jobs.js",
+    "job:dev": "nodemon ./middlewares/jobs.js",
     "start:pm2": "pm2 start app.js --watch",
     "render": "export PATH=\"${PATH}:/opt/render/project/.render/chrome/opt/google/chrome\" && npm run start",
     "dev": "nodemon ./app.js",
