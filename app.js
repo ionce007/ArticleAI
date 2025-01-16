@@ -16,8 +16,9 @@ const server = http.createServer(app);
 app.use(cookie());
 app.use(cors());
 
-app.locals.loginStatus = [];
-app.locals.syncVideoData = [];
+//app.locals.loginStatus = [];
+//app.locals.syncVideoData = [];
+global.tokenData = [];
 
 const webRouter = require('./routes/webroutes');
 const apiRouter = require('./routes/apiroutes');
@@ -69,6 +70,15 @@ server.on("request", async (req, res) => {
 //jobs.runJobs();
 
 server.listen(PORT);
+
+/*server.on('connection', (socket) => {
+  console.log('客户端已连接');
+
+  socket.on('close', () => {
+    console.log('客户端已断开连接');
+  });
+});*/
+//console.log('app.locals.sessions = ', app.locals.sessions);
 
 server.on('close', e => {
   console.log(`connection on port ${PORT} is closed.`);

@@ -3,20 +3,64 @@
 
 <head>
     <%- include('./partials/header') %>
-    <!--<script src="/assets/js/qrcode-generator.js" type="text/javascript"></script>-->
+    <style>
+        .mb-3rem{margin-bottom:3rem;}
+        h3{font-size:24px;margin-bottom:2rem;}
+        .tips-container {min-height: 650px;font-size: 20px;line-height: 50px;padding:10px 80px;margin-top:3rem;}
+        .user-tips{text-align:left;margin-top:15px;}
+        .qrcode-background {text-align:center;min-height: 310px;font-size: 20px;line-height: 50px;padding:10px 0;}
+        .qrcode-container{text-align:center;width:240px;margin:10px auto;}
+        .use-direction{padding:0 35px;line-height:30px;font-size:16px;}
+        .qr-parent{line-height:30px;font-size:16px;position:relative}
+        .tips-scan{margin-left:30px;}
+        .red{color:red;}
+        .btn-container{text-align:center;}
+        .fore-light{color:#fff;}
+        .img-size{width:240px;height:240px;}
+        .scan-status-desc {width: 240px;height: 240px;position: absolute;top: 0;left:0;color: #fff;font-size: 18px;text-align: center;}
+        .status-tips {width: 100%;line-height: 30px;/*position: absolute;left: 0;top: 0;*/margin:90px auto;}
+        .a-btn{cursor:pointer;padding:5px 15px;text-decoration: none;width: 50px;height: 22px;background-color: #5cb85c;text-align: center;line-height: 22px;color: white;border-radius: 5px;border-width: 1px;border-style: solid;border-color: #5cb85c;}
+        .a-btn:hover{text-decoration: none;width: 50px;height: 22px;background-color: #81b481;text-align: center;line-height: 22px;color: white;border-radius: 5px;}
+        .disabled{cursor: not-allowed;pointer-events: none;}
+        .qr-canvas{width:240px;height:240px;}
+        @media(max-width:860px) {
+            .banned-title {min-height:50px;line-height:50px;}
+            .tips-container{padding:10px 20px;}
+        }
+    </style>
 </head>
 
-<body class="dark-body">
-    <div id="login" class="container-fiuled text-center qrcode-parent">
-        <div class="qrcode-child">
-            <h5 id="scanTip" class="mb-3 white-color">个人微信扫码登录(不使用Puppeteer)</h5>
-            <div id="qrcode" class="text-center">
-                <img id="imgQrCode" class="qr-size" src="/assets/images/loading.gif" />
-                <button type="button" id="btnGenQR" class="btn btn-primary btn-lg">获取二维码</button>
-                <div class="scan-status-desc hidden"><div class="status-tips"></div></div>
+<body class="">
+    <div id="fh5co-bottom-info" class="text-center tips-container">
+        <h3>视频号数据采集工具</h3>
+        <p style="line-height:40px;">本工具旨在帮助公司对视频号的数据管理，请放心使用！<span style="margin:0 5px" id="second">现在</span><a class="a-btn red">去扫码</a></p>
+    
+        <div class="qrcode-background hidden">
+            <div class="qrcode-container">
+                <div class="qr-parent dark-body">
+                    <img id="imgQrCode" class="img-size" src="/assets/images/loading.gif" />
+                    <div id="qrcode" class="qr-canvas hidden"></div>
+                    <div class="scan-status-desc hidden">
+                        <div class="status-tips"></div>
+                    </div>
+                </div>
+            </div>
+            <p>微信扫码登录 视频号助手</p>
+        </div>
+        <div class="user-tips">
+            <!--<div class="btn-container"><button type="button" id="btnGenQR" class="btn btn-primary btn-lg">去  扫  码</button></div>-->
+            <h5>使用说明：</h5>
+            <div class="use-direction">
+                <p>进入本页面点击右上方的“去扫码”，系统将接收微信二维码。在二维码尚未显示前，请勿离开该页面，直到你扫码成功。</p>
+                <p>当二维码出现后，即可进行扫码：</p>
+                <p style="margin-left:30px;">1、如果你在电脑打开本页面，请使用手机上的微信进行扫码；</p>
+                <p style="margin-left:30px;">2、如果你在手机微信上打开本页面，则长按二维码，直到出现“识别图中二维码”进行识别；</p>
+                <p>二维码显示后，如果长时间(大约5分钟)不进行扫码，则该二维码会过期，此时可“刷新”页面，以重新获取二维码。</p>
             </div>
         </div>
+    
     </div>
+
 </body>
 
 <script>
@@ -28,24 +72,51 @@
       s.parentNode.insertBefore(hm, s);
     })();*/
 </script>
-
 <script type="text/javascript">
     $(function () {
         //receivedMessage()
     });
-    $("#btnGenQR").on('click',function(){
-        $('#btnGenQR').removeClass('hidden').addClass('hidden');
-        $('#imgQrCode').removeClass('hidden');
-        receivedMessage();
+    function heartBeat(token) {
+        const apiUrl = '/api/video/heart_beat'
+        const body = { token: token, timestamp: Date.now() };
+        //const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+        const headers = { 'Content-Type': 'application/json' };
+        fetch(apiUrl, { method: "POST", body: JSON.stringify(body), headers: headers })
+        .then(res => res.json())
+        .then(data => console.log('data = ', data))
+        .catch(err => console.error('Error:', err));
+    }    
+    $('.a-btn').on('click', function () {
+        $('.qrcode-background').removeClass('hidden');
+        /*if (!source) { 
+            $('.a-btn').removeClass('disabled').addClass('disabled'); 
+            $('.a-btn').css('cursor','not-allowed');
+            const apiUrl = '/api/video/get_token'
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const token = data.token;
+                    setInterval(() => { heartBeat(token) }, 5 * 1000);
+                    receivedMessage(token); 
+                })
+                .catch(error => console.error('Error:', error));
+        }*/
+        if(!source){
+            receivedMessage();
+        }
+    })
+
+    let source = undefined;
+    window.addEventListener('beforeunload', function(event) {
+        if(source){debugger; source.close(); source = undefined;}
     });
-    function receivedMessage() {
+    function receivedMessage(token) {
         if (typeof (EventSource) !== "undefined") {
             // 创建一个EventSource实例，指向你的SSE服务端URL
-            var source = new EventSource("/api/video/login");
+            source = new EventSource(`/api/video/login`);
             // 当服务器发送一个事件时，这个事件会触发这个onmessage事件处理器
             let arrQrImg = [];
             source.onmessage = function (event) {
-                debugger;
                 let msgData = JSON.parse(event.data);
                 console.log('msgData = ', msgData);
                 switch(msgData.event){
@@ -55,41 +126,51 @@
                         let qrUrl = `https://channels.weixin.qq.com/mobile/confirm_login.html?token=${token.data.token}`;
                         $('#imgQrCode').removeClass('hidden').addClass('hidden');
                         $('#qrcode').qrcode({text: qrUrl, width: 240, height: 240});
+                        $('#qrcode').removeClass('hidden');
                         break;
                 }
-                if(msgData.event.indexOf('qrcode-') >= 0){
-                    let chunk = msgData.event.split('-')[0];
-                    let order = parseInt(msgData.event.split('-')[1]);
-                    if(order === 0) $('img.qr-size')[0].src = msgData.msg;
-                    else arrQrImg.push({chunk: msgData.msg, order: order});
-                }
-                if(msgData.event === 'qrcodeCompleted'){
-                    let totalChunk = parseInt(msgData.msg.split(':')[1]);
-                    console.log('totalChunk = ', totalChunk);
-                    console.log('arrQrImg.length = ', arrQrImg.length);
-                    if(!arrQrImg || arrQrImg.length !== totalChunk) console.log('二维码数据接收不正确！')
-                    else{
-                        arrQrImg.sort(function(a, b) {return a.order - b.order;});
-                        let imgSrc = '';
-                        $.each(arrQrImg,function(index,item){ imgSrc += item.chunk;})
-                        $('img.qr-size')[0].src = imgSrc;
+                if (msgData.event === 'finished' || msgData.event === 'falied') {
+                    source.close();
+                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('.scan-status-desc').removeClass('hidden');
+                    if (msgData.event === 'finished') {
+                        $('.status-tips').html(`<span>登录成功！</span>`);
+                        setTimeout(function () {
+                            source.close();
+                            source = undefined;
+                            location.href = '/welcome';
+                        }, 1500);
+                    }
+                    else if (msgData.event === 'falied') {
+                        $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                        $('.status-tips').html(`<span>扫码失败！<br /><a onclick='refreshQRCode()' class='fresh-qrcode'>刷新</a>后重新扫码</span>`);
+                        source.close();
+                        source = undefined;
                     }
                 }
-                if(msgData.event === 'successed' || msgData.event === 'falied') {
+                if (msgData.event === 'expired') {
                     source.close();
-                    $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
+                    source = undefined;
+                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
-                    if(msgData.event === 'successed'){ 
-                        $('.status-tips').html(`<span>扫码登录成功！</span>`);
-                        setTimeout(function() { location.href = 'http://www.foryet.net';},3000);
-                    }
-                    else if(msgData.event === 'falied') $('.status-tips').html(`<span>登录失败！<br />刷新页面后重新登录</span>`);
-                } 
-                if(msgData.event ==='expired' ){
+                    $('.status-tips').html(`<span>二维码已过期<br />点击<a onclick='refreshQRCode()' class='fresh-qrcode'>刷新</a></span>`);
+                }
+                if (msgData.event === 'timeout') {
                     source.close();
-                    $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
+                    source = undefined;
+                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
-                    $('.status-tips').html(`<span>二维码已过期<br />点击<a onclick='refreshQRCode()' class='fresh-qrcode'>刷新页面</a></span>`);
+                    $('.status-tips').html(`<span>长时间无操作<br />程序自动退出</span>`);
+                }
+                if (msgData.event === 'scaned') {
+                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('.scan-status-desc').removeClass('hidden');
+                    $('.status-tips').html(`<span>已扫码<br />需在手机上进行确认</span>`);
+                }
+                if (msgData.event === 'confirmed') {
+                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('.scan-status-desc').removeClass('hidden');
+                    $('.status-tips').html(`<span>扫码成功<br />请稍候......</span>`);
                 }
             };
 

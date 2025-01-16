@@ -3,19 +3,26 @@
 
 <head>
     <%- include('./partials/header') %>
-    <!--<script src="/assets/js/qrcode-generator.js" type="text/javascript"></script>-->
+    <style>
+        h3{font-size:24px;}
+        .tips-container {min-height: 650px;font-size: 20px;line-height: 50px;padding:10px 80px;margin-top:3rem;}
+        .tips-container>h3{margin-bottom: 10px;}
+        .red{color:red;font-weight:600;}
+        
+        @media(max-width:860px) {
+            .banned-title {min-height:50px;line-height:50px;}
+            .tips-container{padding:10px 20px;}
+        }
+    </style>
 </head>
 
-<body class="dark-body">
-    <div id="login" class="container-fiuled text-center qrcode-parent">
-        <div class="qrcode-child">
-            <h5 id="scanTip" class="mb-3 white-color">个人微信扫码登录(不使用Puppeteer)</h5>
-            <div id="qrcode" class="text-center">
-                <img id="imgQrCode" class="qr-size" src="/assets/images/loading.gif" />
-                <button type="button" id="btnGenQR" class="btn btn-primary btn-lg">获取二维码</button>
-                <div class="scan-status-desc hidden"><div class="status-tips"></div></div>
-            </div>
-        </div>
+<body class="">
+    <div id="fh5co-bottom-info" class="text-center tips-container">
+        <!--<h3>视频号数据采集工具</h3>-->
+        <p class="red">扫码登录成功！</p>
+        <p>欢迎使用视频号数据采集系统！</p>
+        <p>如有任何疑问，请添加下方官微与我联系。</p>
+        <p><img src="/assets/images/dyqywxQRCode.png" style="width:300px;height:450px;" /></p>
     </div>
 </body>
 
