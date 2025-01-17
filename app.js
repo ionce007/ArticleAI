@@ -22,7 +22,7 @@ global.tokenData = [];
 
 const webRouter = require('./routes/webroutes');
 const apiRouter = require('./routes/apiroutes');
-const jobs = require('./middlewares/jobs');
+//const jobs = require('./middlewares/jobs');
 
 app.use(rateLimit({ windowMs: 30 * 1000, max: 60 }));
 app.use(compression());
