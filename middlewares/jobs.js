@@ -82,6 +82,7 @@ async function checkLoginStatus(loginData) {
         const saveRet = await fetch(postUrl, { method: 'POST', body: JSON.stringify(data), headers: postHeaders })
         ret = await saveRet.json();
         ret.checkStatus = checkStatus;
+        console.log(`保存用户 ${loginData.finderUser.nickname}(${loginData.finderUser.adminNickname}) 的在线状态`);
     }
     catch (ex) {
         console.log('checkLoginStatus error：', ex.message);
@@ -144,6 +145,7 @@ async function hepler_merlin_mmdata(loginData, status) {
         let postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/helper/hepler_merlin_mmdata?_rid=${common.generateRid()}`
         const res = await fetch(postUrl, { method: 'POST', body: JSON.stringify(body), headers: headers });
         ret = await res.json();
+        console.log(`用户 “${loginData.finderUser.nickname}(${loginData.finderUser.adminNickname})” 的心跳线状态 ${ret.errCode}, 说明：${ret.errMsg}`);
     }
     catch (ex) {
         console.log('hepler_merlin_mmdata error：', ex.message);
@@ -221,7 +223,7 @@ async function checkUserOnline(queueItem) {
         if (onlineUsers && onlineUsers.length > 0) {
             let online = onlineUsers.find(user => user.finderUser.uniqId === queueItem.uniqId);
 
-            if (!online) { isOnline = true; reqData = online; }
+            if (!online) { isOnline = false; reqData = null; }
             else {
                 reqData = JSON.parse(Buffer.from(queueItem.requestData.replaceAll(' ', '+'), 'base64').toString());
                 const statusRet = await checkLoginStatus(reqData);
@@ -243,19 +245,18 @@ async function checkUserOnline(queueItem) {
 async function downloadVideoData() {
     let ret = {};
     try {
-        //console.log('downloadVideoData -> downloadVideoQueue = ', downloadVideoQueue);
         if (!downloadVideoQueue || downloadVideoQueue.length === 0) return { code: -2, data: [], msg: '队列没有数据', success: false }
 
         downloadVideoQueue.forEach(async (item, index) => {
             const checkRet = await checkUserOnline(item);
             let queueStatus = {};
             if (checkRet.online) {
-                const reqData = checkRet.reqData;
+                const reqData = typeof (checkRet.reqData) === "string" ? JSON.parse(checkRet.reqData) : checkRet.reqData;
                 let pageIndex = 1;
-                queueStatus = { uniqId: reqData.finderUser.uniqId, status: 1, remark: '正在处理中' };
+                const finderUser = typeof (reqData.finderUser) === "string" ? JSON.parse(reqData.finderUser) : reqData.finderUser;
+                queueStatus = { uniqId: finderUser.uniqId, status: 1, remark: '正在处理中' };
                 ret = await changeDownlaodQueueStatus(queueStatus);
                 ret = await saveUserContent(reqData, pageIndex, 11);//视频数据下载
-                console.log('saveUserContent->ret = ', ret);
                 pageIndex = 1;
                 ret = await saveUserContent(reqData, pageIndex, 10);//图文数据下载
                 if (ret.code === 1) queueStatus = { uniqId: reqData.finderUser.uniqId, status: 2, remark: ret.msg };
@@ -263,7 +264,6 @@ async function downloadVideoData() {
                 ret = await changeDownlaodQueueStatus(queueStatus);
             }
             else {
-                //console.log('item = ', item);
                 queueStatus = { uniqId: item.uniqId, status: -2, remark: '授权失效' };
                 ret = await changeDownlaodQueueStatus(queueStatus);
             }
@@ -287,15 +287,20 @@ async function jobLoginStatusCheck() {
     const statusCheckJob = schedule.scheduleJob('loginStatusCheckJob', statusCheckJobRule, async () => {
         try {
             console.log('2、statusCheckJob每次计划执行中的事件。')
+            console.log('开始整理用户数据......')
             userData.forEach(async (user, index) => {
                 if (typeof (user) === "string") user = JSON.parse(user);
-                let loginData = JSON.parse(user.data);//JSON.parse(Buffer.from(user.access_token.replaceAll(' ', '+'), 'base64').toString());
+                let loginData = JSON.parse(user.data);
+                console.log(`开始检测用户 ${loginData.finderUser.nickname}（${loginData.finderUser.adminNickname}）的在线状态 ......`)
                 const statusRet = await checkLoginStatus(loginData);
+                let online = false;
                 if (statusRet.code === 1 && statusRet.checkStatus === 0) {
                     let index = onlineUsers.findIndex(item => item.finderUser.uniqId === loginData.finderUser.uniqId);
                     if (index < 0) onlineUsers.push(loginData);
                     else onlineUsers[index] = loginData
+                    online = true;
                 }
+                console.log(`用户 ${loginData.finderUser.nickname}（${loginData.finderUser.adminNickname}）的在线状态为 ${online ? '“在线”' : '“离线”'}`)
                 await hepler_merlin_mmdata(loginData, statusRet.checkStatus);
             })
             //await downloadVideoData();
@@ -308,15 +313,21 @@ async function jobLoginStatusCheck() {
     statusCheckJob.on("scheduled", async () => {
         try {
             console.log('1、statusCheckJob每次计划执行前的事件。time:', common.dateFormat(new Date(), false));
+            console.log('开始获取所有用户......')
             await getVideoUsers(1);
+            console.log(`获取用户完成，共计用户数 ${userData.length}`)
+            console.log('开始获取内容下载队列...... ')
             const ret = await getDownloadVideoQueue();
+            console.log(`内容下载队列获取完成，共计 ${ret.data.length} 条记录`)
             if (!downloadVideoQueue) downloadVideoQueue = [];
             if (ret.code === 1 && ret.data && ret.data.length > 0) {
+                console.log('开始整理内容下载队列...... ')
                 ret.data.forEach(async newItem => {
                     let index = downloadVideoQueue.findIndex(async item => item.uniqId === newItem.uniqId);
                     if (index < 0) downloadVideoQueue.push(newItem);
                     else downloadVideoQueue[index] = newItem;
                 })
+                console.log('内容下载队列整理完成');
             }
         }
         catch (ex) {
@@ -346,7 +357,6 @@ async function jobSynchronousContentData() {
     const SyncContentDataJob = schedule.scheduleJob('syncContentDataJob', syncJobRule, async () => {
         console.log('2、SyncContentDataJob每次计划执行中的事件。')
         const ret = await downloadVideoData();
-        console.log('downloadVideoData->ret = ', ret);
     });
     SyncContentDataJob.on("scheduled", async () => {
         console.log('1、SyncContentDataJob每次计划执行前的事件。time:', common.dateFormat(new Date(), false));
