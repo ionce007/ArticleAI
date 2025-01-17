@@ -5,6 +5,8 @@ const common = require('../middlewares/common.js');
 const video = require('../middlewares/wxvideo.js');
 
 const FingerPrintDeviceId = uuidv4().replace(/-/g, '');
+const postBaseUrl = 'http://www.foryet.net';
+
 let IP = "";
 async function showWelcome(req, res, next) {
     res.render('vwelcome', { data: [], msg: `successed`, code: 1 });
@@ -150,7 +152,7 @@ async function saveSyncVideoData(res, cookie, userData, headers) {
             uniqId: requestData.finderUser.uniqId, wxName: requestData.finderUser.adminNickname, vName: requestData.finderUser.nickname,
             joinTime: Date.now(), requestData: reqData, status: 0, remark: '新增下载数据', doTime: 0
         };
-        const postBaseUrl = process.env.WX_VIDEO_POST_URL || 'http://localhost:9901';
+        //const postBaseUrl = process.env.WX_VIDEO_POST_URL || 'http://localhost:9901';
         const postUrl = `${postBaseUrl}/api/actions.aspx?action=user_video_queue`;
         const postHeaders = { 'Content-Type': 'application/x-www-form-urlencoded' };
         await writeMessage(res, { msg: '开始保存视频队列数据', data: {}, event: 'message' }, 'message');
@@ -195,7 +197,7 @@ async function saveLoginData(res, cookies, userInfo, headers) {
             supplier: uniqId, access_token: base64Str, expires_in: expires, refresh_token: 'wxvideo_login',
             scope: nickname, remark: '', createdAt: updatedAt, updatedAt: updatedAt
         };
-        const postBaseUrl = process.env.WX_VIDEO_POST_URL || 'http://localhost:9901';
+        //const postBaseUrl = process.env.WX_VIDEO_POST_URL || 'http://localhost:9901';
         const postUrl = `${postBaseUrl}/api/actions.aspx?action=wx_video_auth`;
         const postHeaders = { 'Content-Type': 'application/x-www-form-urlencoded' };
         await writeMessage(res, { msg: '开始保存数据', data: {}, event: 'message' }, 'message');

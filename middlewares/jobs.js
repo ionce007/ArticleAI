@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const common = require('./common.js');
 
 const pageSize = 20;
-const baseUrl = process.env.WX_VIDEO_POST_URL || 'http://localhost:9901';
+const baseUrl = 'http://www.foryet.net';// process.env.WX_VIDEO_POST_URL || 'http://localhost:9901';
 
 async function getVideoUsers(pageIndex) {
     let ret = {};
@@ -19,6 +19,7 @@ async function getVideoUsers(pageIndex) {
         else ret = { code: 1, data: userData, msg: '成功获取所有用户', success: true };
     }
     catch (ex) {
+        console.log('getVideoUsers error：', ex.message);
         ret = { code: -999, data: [], msg: ex.message, success: false };
     }
     return ret;
@@ -31,6 +32,7 @@ async function getDownloadVideoQueue() {
         ret = res.json();
     }
     catch (ex) {
+        console.log('getDownloadVideoQueue error：', ex.message);
         ret = { code: -999, data: [], msg: ex.message, success: false };
     }
     return ret;
@@ -41,16 +43,24 @@ async function getDownloadVideoQueue() {
     return `${header}-${tail}`
 }*/
 async function getCookies(loginData) {
-    let cookieStr = '';
-    if (loginData.hasOwnProperty('cookies') && loginData.cookies && loginData.cookies.length > 0) {
-        loginData.cookies.forEach(async (item, index) => { cookieStr += `${item.name}=${item.value};` })
+    try {
+        let cookieStr = '';
+        if (typeof (loginData) === "string") loginData = JSON.parse(loginData);
+        if (loginData.hasOwnProperty('cookies') && loginData.cookies && loginData.cookies.length > 0) {
+            loginData.cookies.forEach(async (item, index) => { cookieStr += `${item.name}=${item.value};` })
+        }
+        return cookieStr.substring(0, cookieStr.length - 1);
     }
-    return cookieStr.substring(0, cookieStr.length - 1);
+    catch (ex) {
+        console.log('getCookies error：', ex.message);
+        return "";
+    }
 }
 async function checkLoginStatus(loginData) {
     let ret = {};
     let checkStatus = -1;
     try {
+        if (typeof (loginData) === 'string') loginData = JSON.parse(loginData);
         let cookieStr = await getCookies(loginData);
         let headers = loginData.reqHeaders;
         headers.cookie = cookieStr;
@@ -74,6 +84,7 @@ async function checkLoginStatus(loginData) {
         ret.checkStatus = checkStatus;
     }
     catch (ex) {
+        console.log('checkLoginStatus error：', ex.message);
         ret = { code: -999, data: [], msg: ex.message, success: false, checkStatus: checkStatus };
     }
     return ret;
@@ -86,6 +97,7 @@ async function getScheduleRule() {
 async function hepler_merlin_mmdata(loginData, status) {
     let ret = {}
     try {
+        if (typeof (loginData) === 'string') loginData = JSON.parse(loginData);
         if (status !== 0) { return { code: -1, data: [], msg: '检测不在线', success: false }; }
         let cookieStr = await getCookies(loginData);
         let headers = loginData.reqHeaders;
@@ -134,6 +146,7 @@ async function hepler_merlin_mmdata(loginData, status) {
         ret = await res.json();
     }
     catch (ex) {
+        console.log('hepler_merlin_mmdata error：', ex.message);
         ret = { code: -999, data: [], msg: ex.message, success: false };
     }
     return ret;
@@ -146,6 +159,7 @@ async function changeDownlaodQueueStatus(data) {
         ret = res.json();
     }
     catch (ex) {
+        console.log('changeDownlaodQueueStatus error：', ex.message);
         ret = { code: -999, msg: ex.message, success: false };
     }
     return ret;
@@ -178,8 +192,8 @@ async function saveUserContent(reqData, pageIndex = 1, userpageType = 11) {
         let postData = [];
         ret.data.list.forEach(async (item) => {
             let itemData = {
-                vId: item.objectId, uniqId: reqData.finderUser.uniqId,nickname:reqData.finderUser.nickname,adminNickname:reqData.finderUser.adminNickname,
-                project: '周生生', ptime: item.createTime,title: item.desc.description, action: 'task', userpageType: userpageType, contentData: item
+                vId: item.objectId, uniqId: reqData.finderUser.uniqId, nickname: reqData.finderUser.nickname, adminNickname: reqData.finderUser.adminNickname,
+                project: '周生生', ptime: item.createTime, title: item.desc.description, action: 'task', userpageType: userpageType, contentData: item
             };
             postData.push(itemData);
 
@@ -200,30 +214,36 @@ async function saveUserContent(reqData, pageIndex = 1, userpageType = 11) {
     return ret;
 }
 //https://www.bilibili.com/bangumi/play/ep813631?bsource=baidu_aladdin
-async function checkUserOnline(queueItem){
-    let isOnline = false;
-    let reqData;
-    if(onlineUsers && onlineUsers.length > 0 ){
-        let online = onlineUsers.find(user => user.finderUser.uniqId === queueItem.uniqId);
-        
-        if(!online){ isOnline = true; reqData = online;}
+async function checkUserOnline(queueItem) {
+    try {
+        let isOnline = false;
+        let reqData;
+        if (onlineUsers && onlineUsers.length > 0) {
+            let online = onlineUsers.find(user => user.finderUser.uniqId === queueItem.uniqId);
+
+            if (!online) { isOnline = true; reqData = online; }
+            else {
+                reqData = JSON.parse(Buffer.from(queueItem.requestData.replaceAll(' ', '+'), 'base64').toString());
+                const statusRet = await checkLoginStatus(reqData);
+                if (statusRet.code === 1 && statusRet.checkStatus === 0) isOnline = true;
+            }
+        }
         else {
             reqData = JSON.parse(Buffer.from(queueItem.requestData.replaceAll(' ', '+'), 'base64').toString());
             const statusRet = await checkLoginStatus(reqData);
             if (statusRet.code === 1 && statusRet.checkStatus === 0) isOnline = true;
         }
+        return { online: isOnline, reqData: reqData };
     }
-    else{
-        reqData = JSON.parse(Buffer.from(queueItem.requestData.replaceAll(' ', '+'), 'base64').toString());
-        const statusRet = await checkLoginStatus(reqData);
-        if (statusRet.code === 1 && statusRet.checkStatus === 0) isOnline = true;
+    catch (ex) {
+        console.log('checkUserOnline error：', ex.message);
+        return { online: false, reqData: null };
     }
-    return {online: isOnline, reqData: reqData};
 }
 async function downloadVideoData() {
     let ret = {};
     try {
-        console.log('downloadVideoData -> downloadVideoQueue = ',downloadVideoQueue);
+        //console.log('downloadVideoData -> downloadVideoQueue = ', downloadVideoQueue);
         if (!downloadVideoQueue || downloadVideoQueue.length === 0) return { code: -2, data: [], msg: '队列没有数据', success: false }
 
         downloadVideoQueue.forEach(async (item, index) => {
@@ -242,14 +262,15 @@ async function downloadVideoData() {
                 else queueStatus = { uniqId: reqData.finderUser.uniqId, status: -1, remark: ret.msg };
                 ret = await changeDownlaodQueueStatus(queueStatus);
             }
-            else{
-                console.log('item = ', item);
+            else {
+                //console.log('item = ', item);
                 queueStatus = { uniqId: item.uniqId, status: -2, remark: '授权失效' };
                 ret = await changeDownlaodQueueStatus(queueStatus);
             }
         })
     }
     catch (ex) {
+        console.log('downloadVideoData error：', ex.message);
         ret = { code: -999, data: [], msg: ex.message, success: false };
     }
     return ret;
@@ -264,31 +285,42 @@ async function jobLoginStatusCheck() {
     statusCheckJobRule.second = [0, 20, 40];
     //2、每次计划执行中的事件。
     const statusCheckJob = schedule.scheduleJob('loginStatusCheckJob', statusCheckJobRule, async () => {
-        console.log('2、statusCheckJob每次计划执行中的事件。')
-        userData.forEach(async (user, index) => {
-            let loginData = user.data;//JSON.parse(Buffer.from(user.access_token.replaceAll(' ', '+'), 'base64').toString());
-            const statusRet = await checkLoginStatus(loginData);
-            if (statusRet.code === 1 && statusRet.checkStatus === 0) {
-                let index = onlineUsers.findIndex(item => item.finderUser.uniqId === loginData.finderUser.uniqId);
-                if (index < 0) onlineUsers.push(loginData);
-                else onlineUsers[index] = loginData
-            }
-            await hepler_merlin_mmdata(loginData, statusRet.checkStatus);
-        })
-        //await downloadVideoData();
+        try {
+            console.log('2、statusCheckJob每次计划执行中的事件。')
+            userData.forEach(async (user, index) => {
+                if (typeof (user) === "string") user = JSON.parse(user);
+                let loginData = JSON.parse(user.data);//JSON.parse(Buffer.from(user.access_token.replaceAll(' ', '+'), 'base64').toString());
+                const statusRet = await checkLoginStatus(loginData);
+                if (statusRet.code === 1 && statusRet.checkStatus === 0) {
+                    let index = onlineUsers.findIndex(item => item.finderUser.uniqId === loginData.finderUser.uniqId);
+                    if (index < 0) onlineUsers.push(loginData);
+                    else onlineUsers[index] = loginData
+                }
+                await hepler_merlin_mmdata(loginData, statusRet.checkStatus);
+            })
+            //await downloadVideoData();
+        }
+        catch (ex) {
+            console.log('2、statusCheckJob执行中出错：', ex.message);
+        }
     });
     //1、每次计划执行前的事件。
     statusCheckJob.on("scheduled", async () => {
-        console.log('1、statusCheckJob每次计划执行前的事件。time:', common.dateFormat(new Date(), false));
-        await getVideoUsers(1);
-        const ret = await getDownloadVideoQueue();
-        if (!downloadVideoQueue) downloadVideoQueue = [];
-        if (ret.code === 1 && ret.data && ret.data.length > 0) {
-            ret.data.forEach(async newItem => {
-                let index = downloadVideoQueue.findIndex(async item => item.uniqId === newItem.uniqId);
-                if (index < 0) downloadVideoQueue.push(newItem);
-                else downloadVideoQueue[index] = newItem;
-            })
+        try {
+            console.log('1、statusCheckJob每次计划执行前的事件。time:', common.dateFormat(new Date(), false));
+            await getVideoUsers(1);
+            const ret = await getDownloadVideoQueue();
+            if (!downloadVideoQueue) downloadVideoQueue = [];
+            if (ret.code === 1 && ret.data && ret.data.length > 0) {
+                ret.data.forEach(async newItem => {
+                    let index = downloadVideoQueue.findIndex(async item => item.uniqId === newItem.uniqId);
+                    if (index < 0) downloadVideoQueue.push(newItem);
+                    else downloadVideoQueue[index] = newItem;
+                })
+            }
+        }
+        catch (ex) {
+            console.log('1、statusCheckJob执行前出错:', ex.message);
         }
     });
     //3、每次计划执行后的事件。
@@ -308,7 +340,7 @@ async function jobLoginStatusCheck() {
     })
 }
 
-async function jobSynchronousContentData(){
+async function jobSynchronousContentData() {
     const syncJobRule = new schedule.RecurrenceRule();
     syncJobRule.minute = new schedule.Range(0, 59, 2);
     const SyncContentDataJob = schedule.scheduleJob('syncContentDataJob', syncJobRule, async () => {
@@ -344,9 +376,9 @@ async function jobSynchronousContentData(){
     });
 }
 
-async function runJobs(){
-    const runjobs = !process.env.RUN_JOBS ? false : (process.env.RUN_JOBS.toLowerCase().trim() ==='true' ? true : false);
-    if(!runjobs) return;
+async function runJobs() {
+    const runjobs = !process.env.RUN_JOBS ? false : (process.env.RUN_JOBS.toLowerCase().trim() === 'true' ? true : false);
+    if (!runjobs) return;
     jobLoginStatusCheck();
     jobSynchronousContentData();
 }
