@@ -118,20 +118,22 @@
             let arrQrImg = [];
             source.onmessage = function (event) {
                 let msgData = JSON.parse(event.data);
-                console.log('msgData = ', msgData);
+                //console.log('msgData = ', msgData);
                 switch(msgData.event){
                     case 'getqrcode':
                         let token = msgData.data;
                         if(token.errCode !== 0 ) { source.close(); return;}
                         let qrUrl = `https://channels.weixin.qq.com/mobile/confirm_login.html?token=${token.data.token}`;
-                        $('#imgQrCode').removeClass('hidden').addClass('hidden');
+                        //$('#imgQrCode').removeClass('hidden').addClass('hidden');
                         $('#qrcode').qrcode({text: qrUrl, width: 240, height: 240});
-                        $('#qrcode').removeClass('hidden');
+                        let canvas = $('#qrcode > canvas')[0];
+                        $('#imgQrCode').attr('src', canvas.toDataURL("image/png"));
+                        //$('#qrcode').removeClass('hidden');
                         break;
                 }
                 if (msgData.event === 'finished' || msgData.event === 'falied') {
                     source.close();
-                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
                     if (msgData.event === 'finished') {
                         $('.status-tips').html(`<span>登录成功！</span>`);
@@ -142,7 +144,7 @@
                         }, 1500);
                     }
                     else if (msgData.event === 'falied') {
-                        $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                        $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
                         $('.status-tips').html(`<span>扫码失败！<br /><a onclick='refreshQRCode()' class='fresh-qrcode'>刷新</a>后重新扫码</span>`);
                         source.close();
                         source = undefined;
@@ -151,24 +153,24 @@
                 if (msgData.event === 'expired') {
                     source.close();
                     source = undefined;
-                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
                     $('.status-tips').html(`<span>二维码已过期<br />点击<a onclick='refreshQRCode()' class='fresh-qrcode'>刷新</a></span>`);
                 }
                 if (msgData.event === 'timeout') {
                     source.close();
                     source = undefined;
-                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
                     $('.status-tips').html(`<span>长时间无操作<br />程序自动退出</span>`);
                 }
                 if (msgData.event === 'scaned') {
-                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
                     $('.status-tips').html(`<span>已扫码<br />需在手机上进行确认</span>`);
                 }
                 if (msgData.event === 'confirmed') {
-                    $('#qrcode').removeClass('qrcode-status').addClass('qrcode-status')
+                    $('#imgQrCode').removeClass('qrcode-status').addClass('qrcode-status')
                     $('.scan-status-desc').removeClass('hidden');
                     $('.status-tips').html(`<span>扫码成功<br />请稍候......</span>`);
                 }
