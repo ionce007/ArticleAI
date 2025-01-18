@@ -4,6 +4,9 @@ const common = require('./common.js');
 
 const pageSize = 20;
 const baseUrl = 'http://www.foryet.net';// process.env.WX_VIDEO_POST_URL || 'http://localhost:9901';
+const rid = common.generateRid();
+const uuid = uuidv4();
+const uuid2 = uuidv4();
 
 async function getVideoUsers(pageIndex) {
     let ret = {};
@@ -68,7 +71,7 @@ async function checkLoginStatus(loginData) {
             pluginSessionId: null, rawKeyBuff: null, reqScene: 7, scene: 7, timestamp: Date.now(),
             _log_finder_id: loginData.finderUser.finderUsername, _log_finder_uin: ''
         };
-        let postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/auth/get_auth_info?_rid=${common.generateRid()}`;
+        let postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/auth/get_auth_info?_rid=${rid}`;
         const res = await fetch(postUrl, { method: 'POST', body: JSON.stringify(body), headers: headers });
         ret = await res.json();
         checkStatus = ret.errCode;
@@ -112,29 +115,29 @@ async function hepler_merlin_mmdata(loginData, status) {
                 "14": "",
                 "15": "",
                 "16": "",
-                "17": Math.floor(ticks / 1000),
+                "17": Math.floor(ticks/1000),
                 "18": Math.floor(ticks / 1000),
                 "19": 1,
                 "20": "",
                 "21": 2,
-                "22": uuidv4(),
+                "22": uuid,
                 "23": "",
                 "24": ticks,
                 "25": "",
                 "26": 0,
                 "27": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
-                "28": "",
+                "28": "{\"extra\":{\"user_identity\":1}}",
                 "29": "",
                 "30": "",
                 "31": "Home",
                 "32": "",
-                "33": uuidv4(),
+                "33": uuid2,
                 "34": "",
                 "35": "",
                 "36": 1,
                 "37": "{}",
                 "38": "",
-                "39": `{\"heartbeat_second\":${new Date().getMilliseconds()}}`,
+                "39": `{"heartbeat_second":${new Date().getMilliseconds()}}`,
                 "40": "custom",
                 "41": "{\"customType\":\"heartbeat_report\"}",
                 "42": "{\"screenHeight\":738;\"screenWidth\":1366;\"clientHeight\":738;\"clientWidth\":1366}",
@@ -142,7 +145,7 @@ async function hepler_merlin_mmdata(loginData, status) {
             },
             "_log_finder_id": loginData.finderUser.finderUsername
         }
-        let postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/helper/hepler_merlin_mmdata?_rid=${common.generateRid()}`
+        let postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/helper/hepler_merlin_mmdata?_rid=${rid}`
         const res = await fetch(postUrl, { method: 'POST', body: JSON.stringify(body), headers: headers });
         ret = await res.json();
         console.log(`用户 “${loginData.finderUser.nickname}(${loginData.finderUser.adminNickname})” 的心跳线状态 ${ret.errCode}, 说明：${ret.errMsg}`);
@@ -169,7 +172,7 @@ async function changeDownlaodQueueStatus(data) {
 async function saveUserContent(reqData, pageIndex = 1, userpageType = 11) {
     let ret = {};
     try {
-        let postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/post/post_list?_rid=${common.generateRid()}`;
+        let postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/post/post_list?_rid=${rid}`;
         let cookieStr = await getCookies(reqData);
         let headers = reqData.reqHeaders;
         headers.cookie = cookieStr;

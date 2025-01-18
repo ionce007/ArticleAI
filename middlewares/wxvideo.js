@@ -3,13 +3,8 @@ const common = require('../middlewares/common.js');
 const  cookie_Parser  = require('cookie-parser');
 
 const FingerPrintDeviceId = uuidv4().replace(/-/g, '');
-
-async function generate_timestamp(length = 10){
-    const timestamp = Date.now();
-    if(length === 10 ) return Math.floor(timestamp/1000);
-    else if(length === 13 ) return timestamp;
-    else return Math.floor(timestamp/1000);
-}
+const uuid = uuidv4();
+const uuid2 = uuidv4();
 
 async function hepler_merlin_mmdata(){
     const headers = {
@@ -27,8 +22,8 @@ async function hepler_merlin_mmdata(){
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Windows\""
     }
-    const timestamp10 = generate_timestamp(10);
-    const timestamp13 = generate_timestamp(13);
+    const timestamp10 = common.generate_timestamp(10);
+    const timestamp13 = common.generate_timestamp(13);
     const body = {
         "id": 23865,
         "data": {
@@ -42,26 +37,26 @@ async function hepler_merlin_mmdata(){
             "19": 1,
             "20": "",
             "21": 2,
-            "22": uuidv4(),
+            "22": uuid,
             "23": "",
             "24": timestamp13,
             "25": "",
             "26": 0,
             "27": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
-            "28": "",
+            "28": "{\"extra\":{\"user_identity\":1}}",
             "29": "",
             "30": "",
-            "31": "LoginForIframe",
+            "31": "Home",
             "32": "",
-            "33": uuidv4(),
+            "33": uuid2,
             "34": "",
             "35": "",
             "36": 1,
             "37": "{}",
             "38": "",
-            "39": "{}",
-            "40": "pageEnter",
-            "41": "{}",
+            "39": `{"heartbeat_second":${}}`,
+            "40": "custom",
+            "41": "{\"customType\":\"heartbeat_report\"}",
             "42": "{\"screenHeight\":1032;\"screenWidth\":1920;\"clientHeight\":0;\"clientWidth\":0}",
             "43": ""
         },
@@ -97,8 +92,8 @@ async function helper_mmdata(){
             "17": "null",
             "19": None,
             "20": None,
-            "21": generate_timestamp(13),
-            "22": generate_timestamp(13)
+            "21": common.generate_timestamp(13),
+            "22": common.generate_timestamp(13)
         },
         "addFinderUinBy": 16
     }
@@ -126,7 +121,7 @@ async function get_login_token(){
         "sec-ch-ua-platform": '"Windows"'
     }
     const body = {
-        "timestamp": generate_timestamp(13),  
+        "timestamp": common.generate_timestamp(13),  
         "_log_finder_uin": "",
         "_log_finder_id": "",
         "rawKeyBuff": null,
@@ -158,7 +153,7 @@ async function cookieStr2JSON(cookieStr){
 }
 async function request_qrcode(token){
     try{
-        const postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/auth/auth_login_status?token=${token}&timestamp=${generate_timestamp(13)}&_log_finder_uin=&_log_finder_id=&scene=7&reqScene=7`
+        const postUrl = `https://channels.weixin.qq.com/cgi-bin/mmfinderassistant-bin/auth/auth_login_status?token=${token}&timestamp=${common.generate_timestamp(13)}&_log_finder_uin=&_log_finder_id=&scene=7&reqScene=7`
         const headers = {
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "zh-CN,zh;q=0.9",
@@ -214,7 +209,7 @@ async function auth_data(cookie) {
         "cookie": cookieStr
     }
     body = {
-        "timestamp": generate_timestamp(13),
+        "timestamp": common.generate_timestamp(13),
         "_log_finder_uin": "",
         "_log_finder_id": "",
         "rawKeyBuff": null,
@@ -248,7 +243,7 @@ async function helper_upload_params(finderUsername){
     }
     //const finderUsername = 'v2_060000231003b20faec8c7e4881bc3d3cc0cef3db0779b3fea900c131517c8e714188a0e0162@finder';
     const body = {
-        "timestamp": generate_timestamp(13),
+        "timestamp": common.generate_timestamp(13),
         "_log_finder_uin": "",
         "_log_finder_id": finderUsername,
         "rawKeyBuff": null,

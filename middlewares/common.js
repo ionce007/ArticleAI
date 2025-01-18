@@ -55,14 +55,21 @@ function dateFormat(date, hasYMD) {
     // 拼接成YYYY-MM-DD HH:MM:SS格式
     if(hasYMD) return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     return `${hours}:${minutes}:${seconds}`;
-  }
-  function generateRid() {
+}
+function generateRid() {
     const header = Math.floor(Date.now() / 1e3).toString(16);
     const tail = [...Array(8)].map(() => Math.floor(16 * Math.random()).toString(16)).join("");
     return `${header}-${tail}`
 }
+async function generate_timestamp(length = 10) {
+    const timestamp = Date.now();
+    if (length === 10) return Math.floor(timestamp / 1000);
+    else if (length === 13) return timestamp;
+    else return Math.floor(timestamp / 1000);
+}
 module.exports = {
     getLinuxDistro,
     dateFormat,
-    generateRid
+    generateRid,
+    generate_timestamp
 };
